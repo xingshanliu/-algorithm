@@ -1,0 +1,11 @@
+整体思想：
+    与之前最近的操作比较
+
+题目1：有效的括号
+    https://leetcode-cn.com/problems/valid-parentheses/
+题目思路：
+    出现右括号，匹配之前遇到的左括号。
+
+题目2：最小栈
+    https://leetcode-cn.com/problems/min-stack/
+题目思路：用另一个最小栈保存当前栈对应层次的最小值，并与当前栈操作同步

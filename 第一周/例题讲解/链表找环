@@ -1,0 +1,24 @@
+题目：
+    环形链表 https://leetcode-cn.com/problems/linked-list-cycle/
+    环形链表 II https://leetcode-cn.com/problems/linked-list-cycle-ii/
+思想：龟兔赛跑，一个快指针，一个慢指针，如果有环，快指针一定能追上满指针
+模板：
+    fast = head;
+    // 循环条件只关注fast
+    while (fast != NULL && fast->next != NULL) {
+        // 两步
+        fast = fast->next->next;
+        // 一步
+        head = head->next;
+        if (fast == head) {
+            return 有环；
+        } 
+    }
+    retur 无环；
+
+寻找环起点：
+    从head到环起点的距离=相遇点到环起点的距离
+    while (head != meet) {
+        head = head->next;
+        meet = meet-<next;
+    }

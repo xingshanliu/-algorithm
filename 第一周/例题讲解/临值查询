@@ -1,0 +1,90 @@
+整体思路：
+    1.数据集大小10^5，暴力n^2，必然超时。
+    2.使用排序，找自己左右的两个数，但是只找自己前面的数据，即
+        2前面(1) 删除3-n
+        3前面(2到1) 删除4-n
+        4前面(3到1) 删除5-n
+        ..
+        n-1前面(n-2到1) 删除n 
+        n-(n-1到1) 不删除
+        显然不能多次排序，可以考虑排序一次之后，从n到1往前找，并删除已经找到的数。
+    3.考虑到删除删除已经找到的数之后，顺序不变，且时间复杂度不能更高，采用双链表实现。
+代码：
+    #include <stdio.h>
+    #include <stdlib.h>
+    struct ListNode {
+        int val;
+        int idx;
+        struct ListNode *pre;
+        struct ListNode *next;
+    };
+    #define SIZE 100005
+    int a[SIZE] = {0};
+    struct ListNode* pos[SIZE] = {0};
+    // 原数据的顺序不能改变，因此新开一个数组记录a数组对应的位置。
+    int rank[SIZE] = {0};
+    int ans[SIZE] = {0};
+
+    int ArryCmp(const void *a1,const void *a2)
+    {
+        return a[*(int *)a1] -  a[*(int *)a2];
+    }
+
+    // 双链表非循环列表
+    // 插入尾部:rear->front之后
+    // 插入头部:head->next只前
+    struct ListNode *AddNode(struct ListNode *cur, int idx)
+    {
+        struct ListNode *newNode = malloc(sizeof(struct ListNode));
+        newNode->val = a[idx];
+        newNode->idx = idx;
+        cur->pre->next = newNode;
+        newNode->pre = cur->pre;
+        newNode->next = cur;
+        cur->pre = newNode;
+        return newNode;
+    }
+
+    void DelNode(struct ListNode *cur)
+    {
+        cur->pre->next = cur->next;
+        cur->next->pre = cur->pre;
+        free(cur);
+    }
+
+    int main()
+    {
+        int n;
+        scanf("%d", &n);
+        for (int i = 1; i <= n; i++) {
+            scanf("%d", &a[i]);
+            rank[i] = i;
+        }
+        // 参数：首地址，个数，长度，比较函数
+        // 排序只改变rank数组，rank下标能索引到第k大在a数组的位置rank[k]
+        qsort(&rank[1], n, sizeof(int), ArryCmp);
+        struct ListNode front = {-10000000 - 1, 0, 0, 0};
+        struct ListNode rear = {10000000 + 1, 0, 0, 0};
+        front.next = &rear;
+        rear.pre = &front;
+
+        // 按排序顺序连接链表，为了方便索引到列表节点，增加指针数组
+        for (int i = 1; i <= n; i++) {
+            pos[i] = AddNode(&rear, rank[i]);
+        }
+
+        for (int i = n; i > 1; i--) {
+            struct ListNode* cur = pos[rank[i]];
+            if (cur->val - cur->pre->val <= cur->next->val - cur->val) {
+                ans[i] = cur->pre->idx;
+            } else {
+                ans[i] = cur->next->idx;
+            }
+            DelNode(cur);
+        }
+
+        for (int i = 2; i <= n; i++) {
+            printf("%d %d\n", abs(a[i] - a[ans[i]]), ans[i]);
+        }
+        return 0;
+    }

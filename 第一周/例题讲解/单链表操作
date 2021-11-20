@@ -1,0 +1,54 @@
+题目一：反转链表 https://leetcode-cn.com/problems/reverse-linked-list/
+    pre = null 
+    // 整体框架，遍历链表
+    while (head != null) {
+        // 针对每个node操作并保存next
+        next = head->next;
+        head->next = pre;
+        pre = next;
+    }
+
+题目二：反转K个一组翻转链表 https://leetcode-cn.com/problems/reverse-nodes-in-k-group/submissions/
+    struct ListNode* GroupEnd(struct ListNode* head, int k)
+    {
+        while (head != NULL) {
+            if (--k == 0) {
+                return head;
+            }
+            head = head->next;
+        }
+        return NULL;
+    }
+
+    struct ListNode* reverseKGroup(struct ListNode* head, int k)
+    {
+        // 头结点保护，让逻辑统一，同时保留结果
+        struct ListNode pretect = {0, head};
+        struct ListNode* pre = NULL;
+        struct ListNode* preGroupStart = &pretect;
+
+        // 整体框架，遍历链表
+        while (head != NULL) {
+            // 拆分问题，每K个成一组，获取首位结点
+            struct ListNode* groupEnd = GroupEnd(head, k);
+            if (groupEnd == NULL) {
+                break;
+            }
+            
+            // 连接每组
+            preGroupStart->next = groupEnd;
+            struct ListNode* nextGroupStart = groupEnd->next
+            preGroupStart = head;
+
+            // 每组单独反转
+            while (head != nextGroupStart) {
+                struct ListNode* next = head->next;
+                head->next = pre;
+                pre = head;
+                head = next;
+            }
+            head = nextGroupStart;
+        }
+        preGroupStart->next = head;
+        return pretect.next;
+    }
