@@ -1,0 +1,56 @@
+整体思路：
+	1.确定是单调递增还是单调递减。在递增/递减的过程中，已有的元素还能当做结果。
+	2.当单调性破坏，处理原有的元素，对于已经不能当做结果的元素，做出栈处理，并更新结果。
+	3.新元素入栈。
+	
+	for 每个元素
+		while(栈顶元素不满足单调性) (出栈，更新答案)
+		入栈
+	
+题目1：柱状图中最大的矩形
+	https://leetcode-cn.com/problems/largest-rectangle-in-histogram/
+思路：
+	1.当柱子的高度依次递增时，每个柱子的高度都能成为候选答案的高度，且能继续扩展宽度。
+	2.当当前的柱子低于之前柱子的高度，之前柱子无法继续延伸宽度，
+	以这个这个柱子的高度为答案的长方形已经确认，该柱子需要出栈，且更新答案。
+	3.新柱子入栈
+代码：
+	struct rect {
+		int height;
+		int width;
+	};
+
+	class Solution {
+	public:
+		int largestRectangleArea(vector<int>& heights) {
+			int ans = 0;
+			heights.push_back(0);
+			for(auto height : heights) {
+				int accumulation = 0;
+				while (!s.empty() && s.top().height >= height) {
+					rect topRect = s.top();
+					accumulation += topRect.width;
+					ans = max(ans, accumulation * topRect.height);
+					s.pop();
+				}
+				struct rect newRect = {height, accumulation + 1};
+				s.push(newRect);
+			}
+			return ans;
+		}
+	private:
+		stack<rect> s;
+	};
+	
+题目2：下一个更大元素 II
+	https://leetcode-cn.com/problems/next-greater-element-ii/
+思路：
+	1；从右往左，如果数字依次递减，已经出现的数字依然可以是结果。
+	2.当递减不再递减，栈中小于等于数字，将不再成为结果，需要出栈，
+	3.对于当前数字的下一个最大的数，为栈顶的元素，如果元素为空，说明右边没有比它大的数字。
+	4.本题目为循环数组，可以理解为两倍的原数组。
+
+题目3：最大矩形
+思路：
+	1.矩阵每一行向上看，可看为宽度为1，延伸向上的柱子。
+	2.每一行分别计算，转换为题目一。
