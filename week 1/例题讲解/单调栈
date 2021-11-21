@@ -54,3 +54,41 @@
 思路：
 	1.矩阵每一行向上看，可看为宽度为1，延伸向上的柱子。
 	2.每一行分别计算，转换为题目一。
+	
+题目四：接雨水
+	https://leetcode-cn.com/problems/trapping-rain-water/
+
+思路：
+	1.当单调递减遇到增大，水滴被接住
+	2.计算栈中存在的水滴。
+	3.注意特殊场景。 
+代码：	
+struct rect {
+    int heigh;
+    int width;
+};
+
+class Solution {
+public:
+    int trap(vector<int>& height) {
+        int ans = 0;
+        for(auto h : height) {
+            int totalWidth = 0;
+            while (!s.empty() && h >= s.top().heigh) {
+                rect preRect = s.top();
+                s.pop();
+                totalWidth += preRect.width;
+                if (s.empty()) {
+                    break;
+                }
+                ans += totalWidth * (min(s.top().heigh, h) - preRect.heigh);
+            }
+            rect newRect = {h, totalWidth + 1};
+            s.push(newRect);
+        }
+        return ans;
+    }
+private:
+    stack<rect> s;
+};
+
