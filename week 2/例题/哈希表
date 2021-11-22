@@ -1,0 +1,137 @@
+C++哈希表：
+unordered_map<key, val> map
+=================迭代器========================= 
+begin 　　 返回指向容器起始位置的迭代器（iterator） 
+end 　　   返回指向容器末尾位置的迭代器 
+cbegin　   返回指向容器起始位置的常迭代器（const_iterator） 
+cend 　　  返回指向容器末尾位置的常迭代器 
+=================Capacity================ 
+size  　　 返回有效元素个数 
+max_size   返回 unordered_map 支持的最大元素个数 
+empty      判断是否为空 
+=================元素访问================= 
+operator[]  　　 访问元素 
+at  　　 　　　　访问元素 
+=================元素修改================= 
+insert  　   插入元素 
+erase　　 	 删除元素 
+swap 　　 	 交换内容 
+clear　　 	 清空内容 
+emplace 　	 构造及插入一个元素 
+emplace_hint 按提示构造及插入一个元素 
+================操作========================= 
+find 　　　　　 通过给定主键查找元素,没找到：返回unordered_map::end
+count 　　　　　返回匹配给定主键的元素的个数 
+equal_range 　　返回值匹配给定搜索值的元素组成的范围 
+================Buckets====================== 
+bucket_count 　　　 返回槽（Bucket）数 
+max_bucket_count    返回最大槽数 
+bucket_size 　　　  返回槽大小 
+bucket 　　　　　　 返回元素所在槽的序号 
+load_factor　　　　 返回载入因子，即一个元素槽（Bucket）的最大元素数 
+max_load_factor 　  返回或设置最大载入因子 
+rehash　　　　　　  设置槽数 
+reserve 　　　　　  请求改变容器容量	
+
+题目1：两数之和
+https://leetcode-cn.com/problems/two-sum/
+
+思路：遍历数组，如果当前元素是结果的前部分，那么后面必有一个元素和当前元素组成结果，
+用哈希表记录遍历已经扫描过的元素值和下标，往后遍历时，判断target - cur是否在哈希表中，如果在说明已经找到结果，时间复杂度On;
+
+代码：
+	class Solution {
+	public:
+    vector<int> twoSum(vector<int>& nums, int target) {
+        for (int i = 0; i < nums.size(); i++) {
+            if (h.find(target - nums[i]) != h.end()) {
+                return {h[target - nums[i]], i}; 
+            } 
+            h[nums[i]] = i;
+        }
+        return {};
+    }
+
+		private:
+		unordered_map<int, int> h;
+	};
+
+题目2：模拟行走机器人
+https://leetcode-cn.com/problems/walking-robot-simulation/
+思路：通过map记录障碍物。
+知识点：
+	1.将二维坐标转换一维坐标，(x + x_offset)* row + (y + y_offset), 注：需要将坐标系平移到原点后计算，即即偏移。	
+	2.走地图通用套路
+		// N: 0; E:1; S:2; W:3 
+		int dx[4] = {0, 1, 0, -1};
+		int dy[4] = {1, 0, -1, 0};
+		dir = (dir + 3) % 4 // 左转
+		dir = (dir + 1) % 4 // 左转
+		dir = (dir + 2) % 4 // 向后转
+		nx = x + dx[dir];
+		ny = y + dy[dir];
+		
+class Solution {
+public:
+    int robotSim(vector<int>& commands, vector<vector<int>>& obstacles) {
+        for (auto &abs : obstacles) {
+            s.insert(calhash(abs[0], abs[1]));
+        }
+        // N: 0; E:1; S:2; W:3 
+        int dir = 0;
+        int dx[4] = {0, 1, 0, -1};
+        int dy[4] = {1, 0, -1, 0};
+        int x = 0, y = 0;
+        int ans = 0;
+        for (auto com : commands) {
+            if (com == -2) {
+                dir = (dir + 3) % 4;
+            } else if (com == -1) {
+                dir = (dir + 1) % 4;
+            } else {
+                for (int i = 0; i < com; i++) {
+                    int nx = x + dx[dir];
+                    int ny = y + dy[dir];
+                    if (s.find(calhash(nx, ny)) != s.end()) {
+                        break;
+                    }
+                    x = nx;
+                    y = ny;
+                    ans = max(ans, x * x + y * y);
+                }
+            }
+        }
+        return ans;
+    }
+private:   
+    unordered_set<int> s;
+    long long calhash(int x, int y) {
+        return ((x + 30000) * 60000ll + (y + 30000));
+    }
+};
+	
+题目3：字母异位词分组
+	https://leetcode-cn.com/problems/group-anagrams/
+	
+思路：对字符串进行排序，通过map<string>判断分组是否存在
+知识点：sort(it.begin(), it.end()),如：sort(str.begin(), str.end()); 
+class Solution {
+public:
+    vector<vector<string>> groupAnagrams(vector<string>& strs) {
+        vector<vector<string>> ans;
+        int i = 0;
+        for (auto &str : strs) {
+            string cpy = str;
+            sort(cpy.begin(), cpy.end());
+            if (h.find(cpy) == h.end()) {
+                h[cpy] = i++;
+                ans.push_back({str});
+            } else {
+                ans[h[cpy]].push_back(str);
+            } 
+        }
+        return ans;
+    }
+private:
+    unordered_map<string, int> h;
+};
