@@ -135,3 +135,92 @@ public:
 private:
     unordered_map<string, int> h;
 };
+
+题目4：串联所有单词的子串
+	https://leetcode-cn.com/problems/substring-with-concatenation-of-all-words/
+思路：将问题拆分为子问题，以wordLen*worldSize为窗口大小，滑动切分子串，求这些子串是否与worlds匹配。
+两个集合是否相等，通过哈希表map<string, int>统计计算。
+代码：
+	class Solution {
+	public:
+		vector<int> findSubstring(string s, vector<string>& words) {
+			for (const auto &word : words) {
+				wordsHash[word]++;
+			}
+
+			vector<int> ans;
+			wordLen = words[0].size();
+			int subLen = wordLen * words.size();
+			for (int i = 0; i + subLen <= s.size(); i++) {
+				if (valid(s.substr(i, subLen))) {
+					ans.push_back(i);
+				}
+			}
+			return ans;
+		}
+	private:
+		int wordLen;
+		unordered_map<string, int> wordsHash;
+		bool valid(string sub) {
+			unordered_map<string, int> strHash;
+			for (int i = 0; i < sub.size(); i += wordLen) {
+				strHash[sub.substr(i, wordLen)]++;
+			}
+
+			for (const auto &str : strHash) {
+				if (wordsHash.find(str.first) == wordsHash.end() ||
+					wordsHash[str.first] != str.second) {
+					return false;
+				}
+			}
+
+			return true;
+		}
+	};
+	
+方法优化:以0-wordLen为起点,wordLen步长滚动入map，当满足个数>=words.size，开始删除首部的key。
+	class Solution {
+	public:
+		vector<int> findSubstring(string s, vector<string>& words) {
+			for (const auto &word : words) {
+				wordsHash[word]++;
+			}
+
+			vector<int> ans;
+			wordLen = words[0].length();
+			int subLen = wordLen * words.size();
+			
+			for (int i = 0; i < wordLen; i++) {
+				unordered_map<string, int> strHash;
+				int cnt = 0;
+				for (int j = i; j < s.size(); j += wordLen) {
+					strHash[s.substr(j, wordLen)]++;
+					if (++cnt >= words.size()) {
+						if (valid(strHash)) { 
+							ans.push_back(j - wordLen * (words.size() -1));
+						}
+						string headStr = s.substr(j - wordLen * (words.size() -1), wordLen);            
+						if (strHash[headStr] > 1){
+							strHash[headStr]--;
+						} else {
+							strHash.erase(headStr);
+						}
+					}
+				}
+			}
+			return ans;
+		}
+	private:
+		int wordLen;
+		unordered_map<string, int> wordsHash;
+		bool valid(unordered_map<string, int> &strHash) {
+			for (const auto &str : strHash) {
+				if (wordsHash.find(str.first) == wordsHash.end() ||
+					wordsHash[str.first] != str.second) {
+					return false;
+				}
+			}
+
+			return true;
+		}
+	};
