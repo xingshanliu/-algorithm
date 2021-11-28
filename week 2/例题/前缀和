@@ -1,0 +1,65 @@
+思想：
+	假设i>0，j < i;
+	s[0] = 0;
+	前缀和
+	s[i] = s[i - 1] + ai
+	子段和
+	s[j - i] = s[i] - s[j]
+	最小前缀
+	preMin[i] = min(preMin[i - 1], s[i]);
+	最大前缀
+	preMax[i] = MAX(preMAX[i - 1], s[i]);
+
+题目1：统计「优美子数组」
+	https://leetcode-cn.com/problems/count-number-of-nice-subarrays/
+思路；1.问题转换为求满足条件子段有多少个
+	  2.s[j - i] = s[i] - s[j] = k => s[i] - k = s[j],问题再次转换为i前面有多少个s[i] - k的j。
+	  3.求完子段和之后，只需要从左到右遍历preSum，记录preSum[cur]对应值出现的次数，cout[preSum[i]]++;
+	  4.对于当前的i,如果满足条件，s[i] - k >=0 && cout[s[i] - k]不为0
+
+class Solution {
+public:
+    int numberOfSubarrays(vector<int>& nums, int k) {
+        int num = nums.size();
+        vector<int> preSum(num + 1, 0);
+        for (int i = 1; i <= num; i++) {
+            preSum[i] = preSum[i - 1] + nums[i - 1] % 2; // 注意nums是元素组，所以是nums[i - 1]
+        }
+        vector<int> count(num + 1, 0);
+        count[preSum[0]]++;
+        int ans = 0;
+        for (int i = 1; i <= num; i++) {
+            if (preSum[i] >= k) {
+                ans += count[preSum[i] - k];
+            }
+            count[preSum[i]]++;
+        }
+        return ans;
+    }
+};
+
+题目2：最大子序和
+	https://leetcode-cn.com/problems/maximum-subarray/
+思路；1.问题转换哪一个子段和最大
+      2.s[i-j] = s[i] - s[j -1]；固定s[i]，求i的最小前缀和preMin[i]（包含s[i]），则max（s[i-j]）= s[i] - preMin[i -1]； 注i>j
+	  3.比较i为[1-n]，哪一个s[i] - preMin[i -1]最大，
+代码：
+	class Solution {
+	public:
+		int maxSubArray(vector<int>& nums) {
+			int n = nums.size();
+			vector<int> preSum(n + 1, 0);
+			for (int i = 1; i <= n; i++) {
+				preSum[i] = preSum[i - 1] + nums[i - 1];
+			}
+			vector<int> preMin(n + 1, 0);
+			for (int i = 1; i <= n; i++) {
+				preMin[i] = min(preMin[i - 1], preSum[i]); 
+			}
+			int ans = -10000000000;
+			for (int i = 1; i <= n; i++) {
+				ans = max(ans, preSum[i] - preMin[i - 1]);// 这里是preMin[i - 1]标识i之前的最小子段和
+			}
+			return ans;
+		}
+	};

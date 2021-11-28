@@ -1,0 +1,87 @@
+题目：LRU 缓存机制
+	https://leetcode-cn.com/problems/lru-cache/
+思路：unordered_map<key, node*>用于快速查找key,
+	双链表用于模仿队列，（最新）对头插入，（最久）队尾删除。
+代码：
+	struct node {
+    int key;
+    int value;
+    struct node* pre;
+    struct node* next;
+};
+
+class LRUCache {
+public:
+    LRUCache(int capacity) {
+        this->capacity = capacity;
+        head.pre = NULL;
+        head.next = &tail;
+        tail.pre = &head;
+        tail.next = NULL;
+    }
+    
+    int get(int key) {
+        if (cacheMap.find(key) == cacheMap.end()) {
+            return -1;
+        }
+        struct node* n = cacheMap[key];
+        ListRemove(n);
+        ListAdd(&head, n);
+        return n->value;
+    }
+    
+    void put(int key, int value) {
+        if (cacheMap.find(key) != cacheMap.end()) {
+            struct node* n = cacheMap[key];
+            n->value = value;
+            ListRemove(n);
+            ListAdd(&head, n);
+            return;
+        }
+
+        struct node* newNode = new struct node;
+        newNode->key = key;
+        newNode->value = value;
+        cacheMap[key] = newNode;  // 注意先赋值再判缓存是否达到capacity
+        if (cacheMap.size() > capacity) {
+            struct node* tailNode = tail.pre; // 记得移除map
+            ListRemove(tailNode);
+            cacheMap.erase(tailNode->key); // 
+            delete tailNode;
+        }
+        ListAdd(&head, newNode);
+    }
+
+
+private:
+    int capacity;
+    struct node head;
+    struct node tail;
+    unordered_map<int, struct node*> cacheMap;
+    void ListRemove(struct node* n) {
+        n->pre->next = n->next;
+        n->next->pre = n->pre;
+    }
+
+    void ListAdd(struct node* cur, struct node* newNode) {
+        cur->next->pre = newNode;
+        newNode->next = cur->next;
+        newNode->pre = cur;
+        cur->next = newNode;
+    }
+    void printNode() {
+        struct node* n = head.next;
+        cout<<"-------------"<<endl;
+        while (n != &tail) {
+            cout<<n->key<<endl;
+            n = n->next;
+        }
+    }
+};
+
+/**
+ * Your LRUCache object will be instantiated and called as such:
+ * LRUCache* obj = new LRUCache(capacity);
+ * int param_1 = obj->get(key);
+ * obj->put(key,value);
+ */
