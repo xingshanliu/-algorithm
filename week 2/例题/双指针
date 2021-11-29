@@ -1,0 +1,65 @@
+题目一：三数之和
+	https://leetcode-cn.com/problems/3sum/
+整体思路：
+先排序，从左向右遍历，固定一个数，找其后面满足两数之和。
+两数之和采用双指针，
+代码：
+class Solution {
+public:
+    vector<vector<int>> threeSum(vector<int>& nums) {
+        sort(nums.begin(), nums.end());
+        vector<vector<int>> ans;
+        int n = nums.size();
+        for (int i = 0; i < n; i++) {
+            if (i > 0 && nums[i - 1] == nums[i]) {
+                continue;
+            }
+            vector<vector<int>> jks = twoSum(nums, i + 1, -nums[i]);
+            for (auto & jk : jks) {
+                ans.push_back({nums[i], jk[0], jk[1]});
+            }
+        }
+        return ans;
+    }
+
+    vector<vector<int>> twoSum(vector<int>& numbers, int start, int target) {
+        int j =  numbers.size() - 1;
+        vector<vector<int>> jks;
+        for (int i = start; i < numbers.size(); i++) {
+            if (i > start && numbers[i - 1] == numbers[i]) {
+                continue;
+            }
+            while(i < j && (numbers[i] + numbers[j] > target)) {
+                j--;
+            }
+            if (i < j && numbers[i] + numbers[j] == target) {
+                jks.push_back({numbers[i], numbers[j]});
+            }
+        }
+        return jks;
+    }
+};
+
+题目2：盛最多水的容器
+	https://leetcode-cn.com/problems/container-with-most-water/
+整体思路：
+题目求宽度*高度，采取从两端向中间逼近，比较两个端点，如果固定一段1，移动另一端2是否一段1还能和其他组成最优解，不过不能，
+则一段1需要被过滤掉。对于较矮的一段，另一端再往中间移动，也不能找到更优解，
+代码：
+class Solution {
+public:
+    int maxArea(vector<int>& height) {
+        int i = 0;
+        int j = height.size() - 1;
+        int ans = 0;
+        while (i < j) {
+            ans = max(min(height[i],  height[j]) * (j - i), ans);
+            if (height[i] < height[j]) {
+                i++;
+            } else {
+                j--;
+            }
+        }
+        return ans;
+    }
+};

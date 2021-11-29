@@ -1,0 +1,29 @@
+整体思路：
+	差分数组的前缀和就是元素组A
+	对原数组l-r加d，查分数组B变化l加d,r+1减d
+
+题目1:航班预订统计
+	https://leetcode-cn.com/problems/corporate-flight-bookings/
+
+
+class Solution {
+public:
+    vector<int> corpFlightBookings(vector<vector<int>>& bookings, int n) {
+        vector<int> diff(n + 2);
+        for (auto &book : bookings) {
+            int first = book[0];
+            int last = book[1];
+            int count = book[2];
+            diff[first] += count;
+            diff[last + 1] -= count;
+        }
+        
+        vector<int> sum(n + 1);
+        for (int i = 1; i <= n; i++) {
+            sum[i] = sum[i - 1] + diff[i];
+        }
+
+        sum.erase(sum.begin());
+        return sum;
+    }
+};
