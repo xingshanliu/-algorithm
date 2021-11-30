@@ -1,0 +1,93 @@
+递归模板：
+1.定义重叠子问题
+2.终止条件
+3.保护和还原现场
+
+题目：子集
+	https://leetcode-cn.com/problems/subsets/
+代码：
+class Solution {
+public:
+    vector<vector<int>> subsets(vector<int>& nums) {
+        num = nums.size();
+        GetSubset(0, nums);
+        return ans;
+    }
+
+    void GetSubset(int i, vector<int>& nums) {
+        if (i >= num) {	//注意结束时最后的一个的下一个位置
+            ans.push_back(chosen);
+            return;
+        }
+        GetSubset(i + 1, nums);
+        chosen.push_back(nums[i]);
+        GetSubset(i + 1, nums);
+        chosen.pop_back();
+    }
+
+int num;
+vector<vector<int>> ans;
+vector<int> chosen;
+};
+
+题目2：组合
+	https://leetcode-cn.com/problems/combinations/
+代码：
+class Solution {
+public:
+    vector<vector<int>> combine(int n, int k) {
+        num = n;
+        GetGroup(1, k);
+        return ans;
+    }
+
+    void GetGroup(int i, int k) {
+        if (chosen.size() > k || (chosen.size() + num - i + 1) < k) {    //注意这是+1，进入下一层还没有对当前数操作 
+            return;
+        }
+        if (i > num) {
+            ans.push_back(chosen);
+            return;
+        }
+        GetGroup(i + 1, k);
+        chosen.push_back(i);
+        GetGroup(i + 1, k);
+        chosen.pop_back();
+    }
+vector<vector<int>> ans;
+vector<int> chosen;
+int num;
+};
+
+题目3：组合
+	https://leetcode-cn.com/problems/permutations/submissions/
+class Solution {
+public:
+    vector<vector<int>> permute(vector<int>& nums) {
+        num = nums.size();
+        vector<bool> used(num, false);
+        GetPermute(1, nums, used);
+        return ans;
+    }
+
+    void GetPermute(int deep, vector<int>& nums, vector<bool>& used) {
+        if (deep > num) {
+            ans.push_back(chosen);
+            return;
+        }
+
+        for (int i = 0; i < num; i++) {
+            if (used[i] == false) {
+                chosen.push_back(nums[i]);
+                used[i] = true;
+                GetPermute(deep + 1, nums, used);
+                chosen.pop_back();
+                used[i] = false;
+            }
+        }
+    }
+
+vector<vector<int>> ans;
+vector<int> chosen;
+int num;
+};
