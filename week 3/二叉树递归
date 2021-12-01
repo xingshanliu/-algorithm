@@ -1,0 +1,170 @@
+题目1： 翻转二叉树
+	https://leetcode-cn.com/problems/invert-binary-tree/
+思路：
+	1.重复子问题（每一个子树都需要交换）
+	2.终止条件；结点为空
+	3.保护和还原现场（没有使用额外的全局变量，不需要）
+class Solution {
+public:
+    TreeNode* invertTree(TreeNode* root) {
+        if (root == NULL) {
+            return NULL;
+        }
+
+        TreeNode* tmp = root->right;
+        root->right = root->left;
+        root->left = tmp;
+
+        invertTree(root->left);
+        invertTree(root->right);
+
+        return root;
+    }
+};
+
+题目2：验证二叉搜索树
+	https://leetcode-cn.com/problems/validate-binary-search-tree/
+思路：
+	1.重复子问题（每个子树满足范围），min<左子树<father, father<右子树<max
+	2.终止条件；结点为空
+	3.保护和还原现场（没有使用额外的全局变量，不需要）
+
+代码：
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    bool isValidBST(TreeNode* root) {
+        return CheckBST(root, -(1ll << 31) - 1, (1ll << 31));
+    }
+
+    bool CheckBST(TreeNode* root, long long leftVal, long long rightVal) {
+        if (root == NULL) {
+            return true;
+        }
+        
+        if (!(root->val > leftVal && root->val < rightVal)) {
+            return false;
+        } 
+
+        return CheckBST(root->right, root->val, rightVal) && CheckBST(root->left, leftVal, root->val); // min<左子树<father, father<右子树<max
+    }
+};
+
+题目3: 二叉树的最大深度
+	https://leetcode-cn.com/problems/maximum-depth-of-binary-tree/
+
+解法一思路：
+	1.重复子问题，从当前结点的最大深度，一定来自左右子树最大的深度+1
+	2.终止条件；结点为空
+	3.保护和还原现场（没有使用额外的全局变量，不需要）
+代码：
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    int maxDepth(TreeNode* root) {
+        if (root == NULL) {
+            return 0;
+        }
+        
+        return max(maxDepth(root->right), maxDepth(root->left)) + 1;
+    }
+};
+
+解法一思路：
+	1.重复子问题，进入子树前,depth++
+	2.终止条件；结点为空,保存答案。
+	3.保护和还原现场，递归回来，depth--
+代码：
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    int maxDepth(TreeNode* root) {
+        depth = 0;
+        ans = 0;
+        GetMaxDepth(root);
+        return ans;
+    }
+    void GetMaxDepth(TreeNode* root) {
+        if (root == NULL) {
+            ans = max(ans, depth);
+            return;
+        }
+        depth++;
+        GetMaxDepth(root->left);
+        GetMaxDepth(root->right);
+        depth--;
+    }
+int ans;
+int depth;
+};
+
+解法一思路：
+	1.重复子问题，从当前结点的最大深度，一定来自左右子树最大的深度+1
+	2.终止条件；结点为空
+	3.保护和还原现场（没有使用额外的全局变量，不需要）
+代码：
+
+题目3: 二叉树的最大深度
+	https://leetcode-cn.com/problems/minimum-depth-of-binary-tree/
+解法一思路：
+	1.重复子问题，从当前结点的最大深度，一定来自左右子树最小的深度+1，需要注意一个子树为空场景。
+	2.终止条件；结点为空
+       2
+null     3
+	null   4
+	  null   5
+代码：
+	/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    int minDepth(TreeNode* root) {
+        if (root == NULL) {
+            return 0;
+        }
+        
+        int right = minDepth(root->right);
+        int left = minDepth(root->left);
+        return (left == 0 || right == 0) ? 
+            (right + left + 1) : (min(right, left) + 1);
+    }
+};
