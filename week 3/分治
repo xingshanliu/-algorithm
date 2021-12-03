@@ -1,0 +1,76 @@
+分治思想：
+	1.子问题可以递归定义
+	2.划分子问题
+	3.合并子问题结果
+	
+题目1：Pow(x, n)
+	https://leetcode-cn.com/problems/powx-n/
+分治思路：
+	1.x^n = x^（n/2) * x^（n/2),
+	2.递归划分子问题split=Pow(x, n/2)
+	3.合并子问题merge = split * split
+递归思路：
+	1.子问题x^n = x^（n/2) * x^（n/2)
+	2.终止条件x^0=1
+	3.不需要还原现场
+	
+代码：
+class Solution {
+public:
+    double myPow(double x, int n) {
+        if (n == 0) {
+            return 1;
+        }
+
+        if (n == -(1ll << 31)) {     // 对于int：1 << 31，出现溢出，需要特殊处理 
+            return 1.0 / myPow(x, (1ll << 31) - 1) * x;
+        }
+
+        if (n < 0) {
+            return 1.0 / myPow(x, -n);
+        }
+
+        double split = myPow(x, n / 2);
+        double merge = split * split;
+        if (n % 2 == 1) {   // 注意余数的场景
+            merge *= x;
+        }
+
+        return merge;
+    }
+};
+
+题目2：括号生成
+	https://leetcode-cn.com/problems/generate-parentheses/
+分治思路：
+	1.子问题（A）+ B
+	2.递归处理分子问题A=generateParenthesis(k - 1);B=generateParenthesis(n - k);
+	3.合并子问题merge ="（"+ A + "）" + B
+	4.划分子问题使用加法，合并时使用乘法
+递归思路：
+	1.子问题（A）+ B
+	2.终止条件n==0,没有括号
+	3.不需要还原现场
+代码：
+	class Solution {
+public:
+    vector<string> generateParenthesis(int n) {
+        if (n == 0) {
+            return {""};
+        }
+        vector<string> ans;
+        for (int k = 1; k <= n; k++) { // 加法，注意子问题A和B都能为空，所以k = 1; k <= n
+            vector<string> left = generateParenthesis(k - 1);
+            vector<string> right = generateParenthesis(n - k);
+
+            for (auto &l : left) {
+                for (auto &r : right) {
+                    ans.push_back("(" + l + ")" + r);
+                }
+            }
+        }
+
+        return ans;
+    }
+};
+

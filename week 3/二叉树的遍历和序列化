@@ -1,0 +1,274 @@
+题目1：二叉树的中序遍历
+	https://leetcode-cn.com/problems/binary-tree-inorder-traversal/
+思路：
+	1.子问题：左子树返回，输出序列，进入右子树
+	2.终止条件：结点==nullptr
+	3.无需保存和还原现场
+代码：	
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    vector<int> inorderTraversal(TreeNode* root) {
+       vector<int> ans;
+       if (root == nullptr) {
+           return ans;
+       }
+       dfx(ans, root);
+       return ans;
+    }
+
+    void dfx(vector<int> &ans, TreeNode* root) {
+        if (root == nullptr) {
+            return;
+        }
+        dfx(ans, root->left);
+        ans.push_back(root->val);
+        dfx(ans, root->right);
+    }
+};
+
+题目2：N叉树的前序遍历
+	https://leetcode-cn.com/problems/n-ary-tree-preorder-traversal/description/
+思路：
+	1.子问题：输出序列遍历子树
+	2.终止条件：结点==nullptr
+	3.无需保存和还原现场
+代码：
+/*
+// Definition for a Node.
+class Node {
+public:
+    int val;
+    vector<Node*> children;
+
+    Node() {}
+
+    Node(int _val) {
+        val = _val;
+    }
+
+    Node(int _val, vector<Node*> _children) {
+        val = _val;
+        children = _children;
+    }
+};
+*/
+
+class Solution {
+public:
+    vector<int> preorder(Node* root) {
+        vector<int> ans;
+        dfs(ans, root);
+        return ans;
+    }
+    void dfs(vector<int> &ans, Node* root) {
+        if (root == nullptr) {
+            return;
+        }
+
+        ans.push_back(root->val);
+        for (auto &child : root->children) {
+            dfs(ans, child);
+        }
+    }
+};
+
+题目3：N 叉树的层序遍历
+思路：
+	1.使用queue实现BFS
+	2.queue<node *, depth>,需要记录每一层的层数，方便对应ans[depth]
+代码:
+/*
+// Definition for a Node.
+class Node {
+public:
+    int val;
+    vector<Node*> children;
+
+    Node() {}
+
+    Node(int _val) {
+        val = _val;
+    }
+
+    Node(int _val, vector<Node*> _children) {
+        val = _val;
+        children = _children;
+    }
+};
+*/
+
+class Solution {
+public:
+    vector<vector<int>> levelOrder(Node* root) {
+        vector<vector<int>> ans;
+        if (root == nullptr) {
+          return ans;  
+        }
+        nodeQueue.push(make_pair(root, 0));
+
+        while (!nodeQueue.empty()) {
+            pair<Node*, int> cur = nodeQueue.front();
+            nodeQueue.pop();
+            if (cur.second >= ans.size()) {
+                ans.push_back({});
+            }
+            ans[cur.second].push_back(cur.first->val);
+            for (auto & child : cur.first->children) {
+                nodeQueue.push(make_pair(child, cur.second + 1));
+            }
+        }
+
+        return ans;
+    }
+
+private:
+    queue<pair<Node*, int>> nodeQueue;
+};
+
+题目4：从前序与中序遍历序列构造二叉树
+	https://leetcode-cn.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/
+思路：	
+	1.先序序列的第一元素为root结点，根据root的值将后序序列，分为两个部分，左边为左子树，右边为右子树
+	2.满足递归定义
+递归思路：
+	1.子问题：递归拆分先序序列和后序序列，组建左右子树
+	2.终止条件：两个下标超过
+	3.无需保护和还原现场
+代码：
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
+        return buildTreeDFS(preorder, 0, preorder.size() - 1,
+            inorder, 0, inorder.size() - 1);
+    }
+
+    TreeNode* buildTreeDFS(vector<int>& preorder, int l1, int r1,
+        vector<int>& inorder, int l2, int r2) {
+        if (l1 > r1 || l2 > r2) {
+            return nullptr;
+        }
+        TreeNode *root = new TreeNode;
+        root->val = preorder[l1];
+        int rootPos = l2;
+        while (inorder[rootPos] != root->val) {
+            rootPos++;
+        }
+        root->left = buildTreeDFS(preorder, l1 + 1, l1 + rootPos - l2, inorder, l2, rootPos - 1);
+        root->right = buildTreeDFS(preorder, l1 + rootPos - l2 + 1, r1, inorder, rootPos + 1, r2);
+
+        return root;
+    }
+};	
+
+题目5：从前序与中序遍历序列构造二叉树
+	https://leetcode-cn.com/problems/serialize-and-deserialize-binary-tree/
+思路：	
+	1.序列化：先序遍历生成序列，子树为空时，显示为null。
+	2.反序列化：先序遍历建立相应的结点
+递归思路：
+	1.子问题：先序遍历操作每个结点
+	2.终止条件：结点为空
+	3.无需保护和还原现场	
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+
+void split(char c, string &src, vector<string> &res)
+{
+    int sp = 0, fp = 0;
+    while(fp < src.length()){
+        fp = src.find(c, sp);
+        res.emplace_back(src.substr(sp, fp - sp));
+        sp = fp + 1;
+    }
+}
+
+void join(char c, vector<string> &src, string &res)
+{
+    if (src.size() == 0) return;
+
+    auto it = src.begin();
+    res += *it;
+
+    for (it++; it != src.end(); it++) {
+        res += c;
+        res += *it;
+    }
+}
+class Codec {
+public:
+
+    // Encodes a tree to a single string.
+    string serialize(TreeNode* root) {
+      string res;
+      vector<string> strArray;
+      serializeDFS(root, strArray);
+      join(',', strArray, res);
+      return res;
+    }
+
+    // Decodes your encoded data to tree.
+    TreeNode* deserialize(string data) {
+        int index = 0;
+        vector<string> strArray;
+        split(',', data, strArray);
+        return deserializeDFS(strArray, index);
+    }
+
+    void serializeDFS(TreeNode* root, vector<string> &strArray) {
+        if (root == nullptr) {
+            strArray.push_back("null");
+            return;
+        }
+
+        strArray.push_back(to_string(root->val));
+        serializeDFS(root->left, strArray);
+        serializeDFS(root->right, strArray);
+    }
+
+    TreeNode* deserializeDFS(vector<string> &strArray, int &index) {   // 注意是&index
+        if (strArray[index] == "null") {
+            index++;
+            return nullptr;
+        }
+
+        TreeNode* root = new TreeNode;
+        root->val = atoi(strArray[index].c_str());
+        index++;
+        root->left = deserializeDFS(strArray, index);
+        root->right = deserializeDFS(strArray, index);
+        return root;
+    }
+};
+
+// Your Codec object will be instantiated and called as such:
+// Codec ser, deser;
+// TreeNode* ans = deser.deserialize(ser.serialize(root));
