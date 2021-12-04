@@ -1,0 +1,47 @@
+题目1：二叉树的最近公共祖先
+	https://leetcode-cn.com/problems/lowest-common-ancestor-of-a-binary-tree/
+思想：
+	1.寻找到第一个左右子树中都有p和q的结点，满足后序操作。
+	2.满足递归定义。
+	3.递归函数返回子树中是否存在p和q，因此使用pair<bool, bool>。
+	4.由于q、p可能出现的在左子树,也可能出现在右子树，注意合并操作。
+递归思想：
+	1.子问题：左右子树是否包含q,p。
+	2.终止条件：遇到空结点，返回<false, false>。
+	3.无需保存和还原现场。
+	
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        ans = nullptr;
+        dfs(root, p, q);
+        return ans;
+    }
+
+    pair<bool, bool> dfs(TreeNode* root, TreeNode* p, TreeNode* q) {       // 返回pair<p找到？，q找到>
+        if (root == nullptr) {
+            return make_pair(false, false);
+        }
+
+        pair<bool, bool> left = dfs(root->left, p, q);
+        pair<bool, bool> right = dfs(root->right, p, q);
+        pair<bool, bool> res; 
+        res.first = left.first || right.first || root == p;            // 注意这里的合并操作
+        res.second = left.second || right.second || root == q;
+        if (res.first && res.second && ans == nullptr) {
+            ans = root;
+        }
+        return res;
+    }
+
+    TreeNode* ans;
+};

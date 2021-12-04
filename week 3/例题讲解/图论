@@ -1,0 +1,93 @@
+题目1：冗余连接
+https://leetcode-cn.com/problems/redundant-connection/
+思路：
+	1.转为图中是否存在环
+	2.挨个插入边，每次进行DFS搜索，判断是否优化。
+DFS思路：
+	1.子问题：遍历当前结点的子节点。
+	2.终止条件：当前结点没有子节点返回即可。
+	3.不需要保护和还原现场，但要记录走过的结点。
+代码：
+class Solution {
+public:
+    vector<int> findRedundantConnection(vector<vector<int>>& edges) {
+        int num = edges.size();
+        graph.assign(num + 1, {});
+        for (auto &edge : edges) {
+            int start = edge[0];
+            int end = edge[1];
+            graph[start].push_back(end);
+            graph[end].push_back(start);
+            visted.assign(num + 1, false);
+            if (dfs(start, 0)) {
+                return {start, end};
+            }
+        }
+
+        return {};
+    }
+
+    bool dfs(int start, int father) {    // 防止无向图往回走,不算环
+        visted[start] = true;
+        for (auto &next : graph[start]) {
+            if (next == father) {        // 回走不算环
+                continue;
+            }
+            if (visted[next]) {
+                return true;
+            }
+            dfs(next, start);
+        }
+        return false;
+    }
+
+    vector<bool> visted;
+    vector<vector<int>> graph;
+};
+
+题目2：课程表
+	https://leetcode-cn.com/problems/course-schedule/
+思路：	
+	1.拓扑排序，访问结点前，它的入度结点必须访问过。
+	2.初始化时，统计每个结点的入度。从初度为0的结点开始遍历
+	3.当前结点访问完成之后，它的出度结点的入度--，当下一个结点的入度为0，才能遍历这个结点。
+	4.队列为空之后，如果所有结点都遍历，说明有解，反之无解。
+代码：
+class Solution {
+public:
+    bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {
+        graph.assign(numCourses, {});
+        into.assign(numCourses, 0);
+        for (auto &edge : prerequisites) {
+            int start = edge[1];
+            int end = edge[0];
+            graph[start].push_back(end);
+            into[end]++;
+        }
+
+        vector<int> finish;
+        for (int i = 0; i < numCourses; i++) {
+            if (into[i] == 0) {
+                q.push(i);
+            }
+        }
+
+        while (!q.empty()) {
+            int cur = q.front();
+            finish.push_back(cur);
+            q.pop();
+            for (auto next : graph[cur]) {
+                into[next]--;
+                if (into[next] == 0) {
+                    q.push(next);
+                }
+            }
+        }
+
+        return finish.size() == numCourses;
+    }
+
+    vector<vector<int>> graph;
+    queue<int> q;
+    vector<int> into;
+};
