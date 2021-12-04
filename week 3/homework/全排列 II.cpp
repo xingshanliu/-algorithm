@@ -1,4 +1,4 @@
-解法一：哈希去重
+//解法一：哈希去重
 class Solution {
 public:
     vector<vector<int>> permuteUnique(vector<int>& nums) {
@@ -44,7 +44,7 @@ public:
     unordered_set<string> s;
 };
 
-解法2：排序+前后两个数比较
+//解法2：排序+前后两个数比较
 class Solution {
 public:
     vector<vector<int>> permuteUnique(vector<int>& nums) {
