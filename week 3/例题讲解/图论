@@ -55,10 +55,10 @@ public:
 代码：
 class Solution {
 public:
-    bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {
-        graph.assign(numCourses, {});
-        into.assign(numCourses, 0);
-        for (auto &edge : prerequisites) {
+    bool canFinish(int num, vector<vector<int>>& edges) {
+        graph.assign(num, {});
+        into.assign(num, 0);
+        for (auto &edge : edges) {
             int start = edge[1];
             int end = edge[0];
             graph[start].push_back(end);
@@ -66,7 +66,7 @@ public:
         }
 
         vector<int> finish;
-        for (int i = 0; i < numCourses; i++) {
+        for (int i = 0; i < num; i++) {
             if (into[i] == 0) {
                 q.push(i);
             }
@@ -84,10 +84,51 @@ public:
             }
         }
 
-        return finish.size() == numCourses;
+        return finish.size() == num;
     }
 
     vector<vector<int>> graph;
     queue<int> q;
     vector<int> into;
+};
+
+代码2：
+class Solution {
+public:
+    bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {
+        graph.assign(numCourses, {});
+        into.assign(numCourses, 0);
+        visted.assign(numCourses, 0);
+        for (auto &edge : prerequisites) {
+            int start = edge[1];
+            int end = edge[0];
+            graph[start].push_back(end);
+        }
+        valid = true;
+        for (int i=0; i < numCourses; i++) {
+            if (visted[i] == 0) {
+                dfs(i); 
+            }
+        }
+        return valid;
+    }
+
+    void dfs(int start) {
+        visted[start] = 1;
+        for (auto next : graph[start]) {
+            if (visted[next] == 1) {
+                valid = false;
+            }
+             if (visted[next] == 0) {
+                dfs(next);    
+             }
+        }
+        visted[start] = 2;
+    }
+
+    vector<vector<int>> graph;
+    queue<int> q;
+    vector<int> into;
+    vector<int> visted;
+    int valid;
 };

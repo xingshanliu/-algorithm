@@ -1,4 +1,11 @@
-// 解法一：BFS拓扑排序
+方法1：BFS
+步骤：
+	1.计算所有结点的入度。
+	2.从入度为0的结点开始广度搜索。
+	3.当前驱结点被遍历到，后序结点的入度--，当结点的入度为0，才能继续遍历
+	4.当队列为空，如果遍历过的结点等于所有结点。表示有拓扑序列
+	
+代码：
 class Solution {
 public:
     vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
@@ -42,7 +49,13 @@ public:
     vector<int> into;
 };
 
-// 解法2：DFS拓扑排序
+方法1：DFS
+步骤：
+	1.DFS遍历所有没有访问的点
+	2.结点有三种状态，0：没有被访问过 1：正在递归访问 3：已经访问完成回溯，可以记入拓扑序列
+	3.遍历过程中如果遇到1的结点，说明有环，不呢形成拓扑排序
+	4.记录的结果为倒序，需要处理
+	
 class Solution {
 public:
     vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
@@ -61,7 +74,7 @@ public:
             }
         }
         if (valid) {
-            reverse(ans.begin(), ans.end());
+            reverse(ans.begin(), ans.end());        // 倒序处理
             return ans;
         }
         return {};
@@ -70,14 +83,15 @@ public:
     void dfs(int start) {
         visted[start] = 1;
         for (auto next : graph[start]) {
-            if (visted[next] == 1) {
+            if (visted[next] == 1) {               // 遇到环
                 valid = false;
+				return;
             }
              if (visted[next] == 0) {
                 dfs(next);    
              }
         }
-        visted[start] = 2;
+        visted[start] = 2;                       // 回溯结束，保存结果
         ans.push_back(start);
     }
 
