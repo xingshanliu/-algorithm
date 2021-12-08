@@ -1,0 +1,226 @@
+搜索模板：
+1.模拟过程
+2.定义状态
+3.选择DFS还是BFS
+	a.如果是树桩结构，选择DFS
+	b.子集、组合、全排列，不需要额外的空间，选择DFS
+	c.求最小或者最短，选择BFS.
+	d.当空间为有向无环图，选择拓扑排序或者记忆化搜索
+4.编写DFS/BFS框架
+题目1：电话号码的字母组合
+	https://leetcode-cn.com/problems/letter-combinations-of-a-phone-number/
+思路：
+	1.指数型的树状转态空间，选择DFS。
+递归思路：
+	1.子问题：每一个数字选择对应的字母
+	2.终止条件：遍历完最后的数字
+	3.现场保存和还原：需要变量记录结果
+代码：
+class Solution {
+public:
+    vector<string> letterCombinations(string digits) {
+        if (digits == "") {
+            return {};
+        }
+        num = digits.size();
+        alphabet['2'] = "abc";
+        alphabet['3'] = "def";
+        alphabet['4'] = "ghi";
+        alphabet['5'] = "jkl";
+        alphabet['6'] = "mno";
+        alphabet['7'] = "pqrs";
+        alphabet['8'] = "tuv";
+        alphabet['9'] = "wxyz";
+        dfs(0, digits);
+        return ans;
+    }
+
+    void dfs(int pos, string &digits) {
+        if (pos >= num) {
+            ans.push_back(picked);
+            return;
+        }
+
+        for (auto ch : alphabet[digits[pos]]) {
+            picked.push_back(ch);
+            dfs(pos + 1, digits);
+            picked.pop_back();
+        }
+    }
+    unordered_map<char, string> alphabet;
+    vector<string> ans;
+    string picked;
+    int num;
+};
+
+题目2：N 皇后
+https://leetcode-cn.com/problems/n-queens/
+思路：
+	1.每一行选一列，列不能重复，全排列选择DFS。
+递归思路：
+	1.子问题：每一行选一列
+	2.终止条件：遍历完最后的一行
+	3.现场保存和还原：需要变量记录结果和判断列、右上、左上是否冲突
+代码：
+class Solution {
+public:
+    vector<vector<string>> solveNQueens(int n) {
+        totalRow = n;
+        totalCol = n;
+        visitCol.assign(n, false);
+        dfs(0);
+        vector<vector<string>> ans;
+        for (auto &colArray : colAns) {
+            vector<string> oneAns(totalRow, string(totalCol, '.'));
+            for (int row = 0; row < totalRow; row++) {
+                oneAns[row][colArray[row]] = 'Q';
+            }
+            ans.push_back(oneAns);
+        }
+
+        return ans;
+    }
+
+    void dfs(int row) {
+        if (row >= totalRow) {
+            colAns.push_back(picked);
+            return;
+        }
+
+        for (int col = 0; col < totalCol; col++) {
+            if (visitCol[col] ||                           
+                leftUp.find(row - col) != leftUp.end() ||
+                rightUp.find(row + col) != rightUp.end()) {
+                continue;
+            }
+            visitCol[col] = true;
+            leftUp.insert(row - col);
+            rightUp.insert(row + col);
+            picked.push_back(col);
+            dfs(row + 1);
+            visitCol[col] = false;
+            leftUp.erase(row - col);
+            rightUp.erase(row + col);
+            picked.pop_back();
+        }
+    }
+    vector<vector<int>> colAns;
+    vector<int> picked;
+    vector<bool> visitCol;
+    unordered_set<int> leftUp;
+    unordered_set<int> rightUp;
+    int totalRow;
+    int totalCol;
+};
+
+题目3：岛屿数量
+https://leetcode-cn.com/problems/number-of-islands/
+思路：
+	1.地图类，选择DFS和BFS都可以
+	2.从某个合法点开始扩展，直到无法扩展，整块区域为一个答案
+	3.切换到下一个点，该点不能是已经访问过的点。
+代码：	
+class Solution {
+public:
+    int numIslands(vector<vector<char>>& grid) {
+        row = grid.size();
+        col = grid[0].size();
+        visited.assign(row, vector<bool>(col, false));
+        int ans = 0;
+        for (int x = 0; x < row; x++) {
+            for (int y = 0; y < col; y++) {
+                if (!visited[x][y] && grid[x][y] == '1') {
+                    bfs(grid, x, y);
+                    ans++;
+                }
+            }
+        }
+
+        return ans;
+    }
+
+    void dfs(vector<vector<char>>& grid, int x, int y) {
+        visited[x][y] = true;
+        for (int direct = 0; direct < 4; direct++) {
+            int nx = x + dx[direct];
+            int ny = y + dy[direct];
+            if (nx < 0 || nx >= row || ny < 0 || ny >= col || visited[nx][ny] || grid[nx][ny] == '0') {
+                continue;
+            }
+            dfs(grid, nx, ny);
+        }
+    }
+
+    void bfs(vector<vector<char>>& grid, int x, int y) {
+        queue<pair<int, int>> q;
+        q.push({x, y});
+        visited[x][y] = true;
+        while (!q.empty()) {
+            pair<int, int> cur = q.front();
+            q.pop();
+            for (int direct = 0; direct < 4; direct++) {
+                int nx = cur.first + dx[direct];
+                int ny = cur.second + dy[direct];
+                if (nx < 0 || nx >= row || ny < 0 || ny >= col || visited[nx][ny] || grid[nx][ny] == '0') {
+                    continue;
+                }
+                q.push({nx, ny});
+                visited[nx][ny] = true;           // 注意入队列后就必须将该点置为已访问
+            }
+        }
+    }
+
+    vector<vector<bool>> visited;
+    int row;
+    int col;
+    const int dx[4] = {0, 0, -1, 1};
+    const int dy[4] = {1, -1, 0, 0};
+};
+
+题目4：最小基因变化
+	https://leetcode-cn.com/problems/minimum-genetic-mutation/
+思路：
+	1.基因序列中的每个基因能向另外三个基因变化。
+	2.求最小变化，采用BFS
+	3.需要记录已经变化过的基因和合法基因，采用set去重。
+代码：
+class Solution {
+public:
+    int minMutation(string start, string end, vector<string>& bank) {
+        for (auto & one: bank) {
+            bankHash.insert(one);
+        }
+
+        if (bankHash.find(end) == bankHash.end()) {
+            return -1;
+        }
+
+        queue<pair<string, int>> q;
+        const char gene[4] = {'A', 'C', 'G', 'T'};
+        q.push({start, 0});
+        visited.insert(start);
+        while (!q.empty()) {
+            pair<string, int> cur = q.front();
+            if (cur.first == end) {
+                return cur.second;
+            }
+            q.pop();
+            for (int i = 0 ; i < 8; i ++) {
+                for (int j = 0; j < 4; j++) {
+                    if (cur.first[i] == gene[j]) {
+                        continue;
+                    }
+                    string next = cur.first;
+                    next[i] = gene[j];
+                    if (bankHash.find(next) == bankHash.end() || visited.find(next) != bankHash.end()) {
+                        continue;
+                    }
+                    q.push({next, cur.second + 1});
+                }
+            }
+        }
+        return -1;
+    }
+    unordered_set<string> bankHash;
+    unordered_set<string> visited;
+};

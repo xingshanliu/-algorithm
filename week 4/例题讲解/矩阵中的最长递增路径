@@ -1,0 +1,119 @@
+题目1: 矩阵中的最长递增路径
+	https://leetcode-cn.com/problems/longest-increasing-path-in-a-matrix/
+思路：
+	1.如果采取一次遍历所有点，进行扩展，将有重复路径。
+	2.考虑到求的是增长路径，可以转换为有向图。
+	3.为了避免重复计算，每个点只有在其他点都经过它过，才计算，满足拓扑排序的定义。
+	4.一个点在拓扑图中，最后到达它的路径一定是最长。
+class Solution {
+public:
+    int longestIncreasingPath(vector<vector<int>>& matrix) {
+        m = matrix.size();
+        n = matrix[0].size();
+        graph.assign(m * n, {});
+        intoDegree.assign(m * n, 0);
+        longStep.assign(m * n, 0);
+        for (int x = 0; x < m; x++) {
+            for (int y = 0; y < n; y++) {
+                for (int direct = 0; direct < 4; direct++) {
+                    int nx = x + dx[direct];
+                    int ny = y + dy[direct];
+                    if (nx < 0 || nx >= m || ny < 0 || ny >= n || 
+                        matrix[nx][ny] <= matrix[x][y]) {
+                        continue;
+                    }
+                    graph[transform(x, y)].push_back(transform(nx, ny));
+                    intoDegree[transform(nx, ny)]++;
+                }
+            }
+        }
+        queue<pair<int, int>> q;
+        for (int i = 0; i < m * n; i++) {
+            if (intoDegree[i] == 0) {
+                q.push({i, 1});
+            }
+        }
+
+        while (!q.empty()) {
+            pair<int, int> cur = q.front();
+            longStep[cur.first] = cur.second;
+            q.pop();
+            for (auto next : graph[cur.first]) {
+                intoDegree[next]--;
+                if (intoDegree[next] == 0) {
+                    q.push({next, cur.second + 1});
+                }
+            }
+        }
+
+        int ans = 0;
+        for (auto step : longStep) {
+            ans = max(ans, step);
+        }
+        return ans;
+    }
+
+private:
+    inline int transform(int x, int y) {
+        return x * n + y;
+    }
+    int m;
+    int n;
+    int dx[4] = {0, 0, -1, 1};
+    int dy[4] = {1, -1, 0, 0};
+    vector<vector<int>> graph;
+    vector<int> intoDegree;
+    vector<int> longStep;
+};
+思路2：
+	1.采用记忆化搜索，自底向上处理。
+	2.以每个当做终点进行扩展，longStep[x][y] = max(dfs(matrix, fromx, fromy) + 1, longStep[x][y]);
+	3.longStep[x][y]记录到当前结点的最长路径。
+代码：
+class Solution {
+public:
+    int longestIncreasingPath(vector<vector<int>>& matrix) {
+        m = matrix.size();
+        n = matrix[0].size();
+        longStep.assign(m, vector<int>(n, 0));
+        for (int x = 0; x < m; x++) {
+            for (int y = 0; y < n; y++) {
+                dfs(matrix, x, y); 
+            }
+        }
+
+        int ans = 0;
+        for (int x = 0; x < m; x++) {
+            for (int y = 0; y < n; y++) {
+                ans = max(ans, longStep[x][y]); 
+            }
+        }
+
+        return ans;
+    }
+
+private:
+    int dfs(vector<vector<int>>& matrix, int x, int y) {
+        if (longStep[x][y] != 0) { // 避免重复计算
+            return longStep[x][y];
+        }
+
+        longStep[x][y] = 1; 
+        for (int direct = 0; direct < 4; direct++) {
+            int fromx = x + dx[direct];
+            int fromy = y + dy[direct];
+            if (fromx < 0 || fromx >= m || fromy < 0 || fromy >= n || 
+                matrix[fromx][fromy] >= matrix[x][y]) {
+                continue;
+            }
+
+            longStep[x][y] = max(dfs(matrix, fromx, fromy) + 1, longStep[x][y]); // 自底向上
+        }
+        return longStep[x][y];
+    }
+    int m;
+    int n;
+    int dx[4] = {0, 0, -1, 1};
+    int dy[4] = {1, -1, 0, 0};
+    vector<vector<int>> longStep;
+};
