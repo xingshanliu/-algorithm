@@ -1,0 +1,168 @@
+二叉堆时间复杂度：
+1.插入O(lgn)
+2.取出堆顶O(lgn)
+3.取最值O(1)
+4.建堆O(n)
+
+C++二叉堆：
+小顶堆：
+	priority_queue<Node> minHead;
+	bool operator<(const struct Node &na, const struct Node &nb) {
+		return na.key > nb.key;
+	}
+
+题目1：合并K个升序链表
+	https://leetcode-cn.com/problems/merge-k-sorted-lists/
+思路：
+	1.每一组中的链表头入队列
+	2.取出堆顶元素（最小值），插入链表队列，顶元素next，入堆。
+	3.直至堆为空
+代码：
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+
+struct Node { 
+    int key;
+    ListNode* n;  
+    Node() : key(0), n(nullptr) {}
+    Node(int key, ListNode* n): key(key), n(n){};
+};
+
+bool operator<(const struct Node &na, const struct Node &nb) {
+    return na.key > nb.key;
+}
+
+class Solution {
+public:
+    ListNode* mergeKLists(vector<ListNode*>& lists) {
+        if (lists.size() == 0) {
+            return nullptr;
+        }
+        priority_queue<Node> minHead;
+        for (auto node : lists) {
+            if (node == nullptr) {
+                continue;
+            }
+            minHead.push({node->val, node});
+        }
+        ListNode head;
+        ListNode *tail = &head;
+        while (!minHead.empty()) {
+            struct Node cur = minHead.top();
+            minHead.pop();
+            tail->next = cur.n;
+            tail = tail->next;
+            if (cur.n->next != nullptr) {
+                minHead.push({cur.n->next->val, cur.n->next});
+            }
+        }
+        return head.next;
+    }
+};
+题目二：滑动窗口最大值
+	https://leetcode-cn.com/problems/sliding-window-maximum/
+思路：	
+	1.将元素插入最大堆，堆顶为最大值
+	2.为了避免执行删除非堆顶元素，采用惰性删除
+	3.堆元素记录在元素组的下标，当该元素达到堆顶，且下标超过当前窗口
+代码1：
+class Solution {
+public:
+    vector<int> maxSlidingWindow(vector<int>& nums, int k) {
+        vector<int> ans;
+        priority_queue<pair<int, int>> maxHeap;
+        for (int i = 0; i < nums.size(); i++) {
+            maxHeap.push({nums[i], i});
+            while (maxHeap.top().second + k <= i) {
+                maxHeap.pop();
+            }
+            if (i >= k - 1) {
+                ans.push_back(maxHeap.top().first); 
+            }
+        }
+        return ans;
+    }
+private:
+};
+
+代码2:
+struct Node {
+    int val;
+    int index;
+    Node(int val, int index): val(val), index(index) {}
+    Node(): val(0), index(0) {}
+};
+
+class MaxHeap {
+public:
+    MaxHeap() {
+        heap.push_back({});
+    } 
+
+    struct Node top() {
+        return heap[1];
+    } 
+
+    void push(struct Node n) {
+        heap.push_back(n);
+        int index = heap.size() - 1;
+        while (index > 1) {
+            if (heap[index/2].val < heap[index].val) {
+                swap(heap[index/2], heap[index]);
+                index /= 2;
+            } else {
+                break;
+            }
+        }
+    }
+
+    void pop() {
+        heap[1] = heap[heap.size() - 1];
+        heap.pop_back();
+        int index = 1;
+        int child = 2 * index;
+        while (child < heap.size()) {
+            if (child + 1 < heap.size() && 
+                heap[child + 1].val > heap[child].val) {
+                child = child + 1;
+            }
+
+            if (heap[index].val < heap[child].val) {
+                swap(heap[index], heap[child]);
+                index = child;
+                child = 2 * index;
+            } else {
+                break;
+            }
+        }
+    }
+private:
+    vector<struct Node> heap;
+};
+
+class Solution {
+public:
+    vector<int> maxSlidingWindow(vector<int>& nums, int k) {
+        vector<int> ans;
+        MaxHeap maxHeap;
+        for (int i = 0; i < nums.size(); i++) {
+            maxHeap.push({nums[i], i});
+            while (maxHeap.top().index + k <= i) {
+                maxHeap.pop();
+            }
+            if (i >= k - 1) {
+                ans.push_back(maxHeap.top().val); 
+            }
+        }
+        return ans;
+    }
+private:
+};
