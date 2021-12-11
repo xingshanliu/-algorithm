@@ -1,0 +1,176 @@
+题目1：二叉搜索树中的插入操作
+	https://leetcode-cn.com/problems/insert-into-a-binary-search-tree/
+思路：
+	1.递归搜索，如果根节点大于给定值，进入左子树，反之，进入右子树，
+	2.当遇到空结点，创建新结点返回
+	3.也可以使用循环实现，需要额外记录父节点
+代码1：
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* insertIntoBST(TreeNode* root, int val) {
+        if (root == nullptr) {
+            TreeNode *newNode = new TreeNode;
+            newNode->val = val;
+            return newNode;
+        }
+
+        if (root->val > val) {
+            root->left = insertIntoBST(root->left, val);
+        } else {
+            root->right = insertIntoBST(root->right, val);
+        }
+        return root;
+    }
+};
+代码2：
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* insertIntoBST(TreeNode* root, int val) {
+        TreeNode* cur = root;
+        TreeNode** father = nullptr;
+        while (cur != nullptr) {
+            if (cur->val > val) {
+                father = &(cur->left);
+                cur = cur->left;
+            } else {
+                father = &(cur->right);
+                cur = cur->right;
+            }
+        }
+
+        TreeNode* newNode = new TreeNode;
+        newNode->val = val;
+        if (root == nullptr) {
+            return newNode;
+        }
+        *father = newNode;
+        return root;
+    }
+};
+
+题目2：后继者
+	https://leetcode-cn.com/problems/successor-lcci/
+思路：	
+	1.先查找目的结点，遍历的过程中，记录大于目标值中最小的结点。
+	2.当找到结点，如果该结点右子树为空，则直接返回遍历中大于目标值中最小的结点。否则，遍历到右子树的最左的子树。
+代码：
+	/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* inorderSuccessor(TreeNode* root, TreeNode* p) {
+        preMin = nullptr;
+        return getNext(root, p->val);
+    }
+
+    TreeNode* getNext(TreeNode* root, int val) {
+        if (root == nullptr) {
+            return nullptr;
+        }
+
+        if (root->val > val && (preMin == nullptr || preMin->val > root->val)) {
+            preMin = root;
+        }
+        if (root->val == val) {
+            if (root->right == nullptr) {
+               return preMin;
+            }
+
+            TreeNode* cur = root->right;
+            while (cur->left != nullptr) {     // 最左子树，注意判断条件是cur->left
+                cur = cur->left;
+            }
+            return cur;
+        } else if (root->val > val) {
+            return getNext(root->left, val);
+        } else {
+            return getNext(root->right, val);
+        }
+
+        return root;
+    }
+
+private:
+    TreeNode* preMin;
+};
+
+题目3：删除二叉搜索树中的节点
+	https://leetcode-cn.com/problems/delete-node-in-a-bst/
+思路：
+	1.递归搜索，如果根节点大于给定值，进入左子树，反之，进入右子树，
+	2.当遇目的结点，判断该节点左右子树是否有一个为空，如果有空子树，将非空子树替代自己。
+	3.当遇目的结点，该节点左右子树都不为空，删除后继-右子树的最左子树，并将后继的值替换目的结点。
+	
+	
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* deleteNode(TreeNode* root, int key) {
+        if (root == nullptr) {   // 找不到，不做改变 
+            return nullptr;
+        }
+
+        if (root->val == key) {
+            if (root->left == nullptr) {
+                return root->right;
+            }
+
+            if (root->right == nullptr) {
+                return root->left;
+            }
+
+            TreeNode* next = root->right;
+            while (next->left != nullptr) {
+                next = next->left;
+            }
+            
+            root->right = deleteNode(root->right, next->val);   // 递归删除后继
+            root->val = next->val;
+        } else if (root->val > key) {
+            root->left = deleteNode(root->left, key);
+        } else {
+            root->right = deleteNode(root->right, key);
+        }
+
+        return root;
+    }
+};
