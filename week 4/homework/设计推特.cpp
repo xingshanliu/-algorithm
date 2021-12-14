@@ -21,7 +21,7 @@ class Twitter {
 public:
     Twitter() {
         timeCount = 0;
-		maxNewsFeed = 10;
+	maxNewsFeed = 10;
     }
     
     void postTweet(int userId, int tweetId) {
@@ -99,7 +99,7 @@ public:
 
 private:
     int timeCount;
-	int maxNewsFeed;
+    int maxNewsFeed;
     unordered_map<int, struct User*> userManager;
 };
 
