@@ -1,7 +1,7 @@
 题目：
     环形链表 https://leetcode-cn.com/problems/linked-list-cycle/
     环形链表 II https://leetcode-cn.com/problems/linked-list-cycle-ii/
-思想：龟兔赛跑，一个快指针，一个慢指针，如果有环，快指针一定能追上满指针
+思想：龟兔赛跑，一个快指针，一个慢指针，如果有环，快指针一定能追上慢指针
 模板：
     fast = head;
     // 循环条件只关注fast
