@@ -9,7 +9,7 @@ public:
     int search(vector<int>& nums, int target) {
         int left = 0;
         int right = nums.size() - 1;          // n -1
-        while (left <= right) {               // 这里有等
+        while (left <= right) {               // 当有解中途返回，且可能存在left == right，无解right + 1 = left
             int mid = (left + right) >> 1;
             if (nums[mid] == target) {
                 return mid;

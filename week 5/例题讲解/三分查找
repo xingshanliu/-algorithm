@@ -1,0 +1,23 @@
+思路：
+	1.在[l, r]区间，选取lmid. rmid。
+	2.如果f(lmid) >= f(rmid), 缩小范围[l, rmid - 1] 注：rmid必然不是极值点
+	3.如果f(lmid) < f(rmid), 缩小范围[lmid + 1, r] 注：lmid必然不是极值点
+	4.终止条件：l == r即 while(l < r)
+代码：
+class Solution {
+public:
+    int findPeakElement(vector<int>& nums) {
+        long long left = 0;
+        long long right = nums.size() -1;
+        while (left < right) {
+            long long lmid = (left + right) >> 1;
+            long long rmid = lmid + 1;
+            if (nums[lmid] <= nums[rmid]) {
+                left = lmid + 1;
+            } else {
+                right = rmid - 1;
+            }
+        }
+        return right;
+    }
+};

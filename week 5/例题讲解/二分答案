@@ -1,0 +1,133 @@
+思路：
+	1.针对最优解问题（最大值和最小）
+	2.解空间具有单调性，采用二分枚举+判定。
+题目1：猜数字大小
+	https://leetcode-cn.com/problems/guess-number-higher-or-lower/
+思路：
+	1.guess为判断函数，根据判断走不通二分流程
+/** 
+ * Forward declaration of guess API.
+ * @param  num   your guess
+ * @return 	     -1 if num is lower than the guess number
+ *			      1 if num is higher than the guess number
+ *               otherwise return 0
+ * int guess(int num);
+ */
+
+class Solution {
+public:
+    int guessNumber(int n) {
+        long long left = 1;
+        long long right = n;
+        while (left <= right) {
+            long long mid = (left + right) >> 1;
+            if (guess(mid) == 0) {
+                return mid;
+            } else if (guess(mid) == 1) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return -1;
+    }
+};
+
+题目2：分割数组的最大值
+https://leetcode-cn.com/problems/split-array-largest-sum/
+思路：
+	1.题目转化为取最小的容量min，容纳m 个子数组
+	2.显然小于min没有结果，大于min有结果，解空间满足单调。
+	3.二分查找最小值。
+代码：
+class Solution {
+public:
+    int splitArray(vector<int>& nums, int m) {
+        int left = 0;                       // 边界left:最大的那个数 right:所有数之和
+        int right = 0;
+        for (auto one : nums) {
+            left = max(left, one);
+            right += one;
+        }
+
+        while (left < right) {
+            int mid = (left + right) >> 1;
+            if (valid(nums, m, mid)) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+
+        return right;
+    }
+
+    bool valid(vector<int>& nums, int m, int cap) {
+        int count = 1;              // 从1开始，至少装一个        
+		int weight = 0;
+        for (auto one : nums) {
+            if (weight + one <= cap) {
+                weight += one;
+            } else {
+                count++;
+                if (one > cap) {
+                    return false;
+                }
+                weight = one;    
+            }
+        }
+        return count <= m;          // 这里是<= 能用更少的装，那更多都没问题
+    }
+};      
+
+题目3：制作 m 束花所需的最少天数
+https://leetcode-cn.com/problems/split-array-largest-sum/
+思路：
+	1.最小天数满足条件
+	2.显然小于min没有结果，大于min有结果，解空间满足单调。
+	3.二分查找最小值。
+代码：
+class Solution {
+public:
+    int minDays(vector<int>& bloomDay, int m, int k) {
+        int left = 1000000000;
+        int lastDay = 0;
+        for (auto day : bloomDay) {             // 边界：left:最小天数，right最大天数
+            left = min(left, day);
+            lastDay = max(lastDay, day);
+        }
+
+        int right = lastDay + 1;                // 存在无解的情况，right == lastDay + 1
+        while (left < right) {
+            int mid = (left + right) >> 1;
+            if (valid(bloomDay, m, k, mid)) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+
+        if (right == lastDay + 1) {
+            return -1;
+        }
+        return right;
+    }
+    
+    bool valid(vector<int>& bloomDay, int m, int k, int curDay) {
+        int flows = 0;
+        int count = 0;
+        for (auto day : bloomDay) {
+            if (curDay >= day) {
+                flows++;
+                if (flows == k) {
+                    count++;
+                    flows = 0;
+                }
+            } else {
+                flows = 0;
+            }
+        }
+
+        return count >= m;        // 这里是>=，能采更多的话，就算减少也有解
+    }
+};
