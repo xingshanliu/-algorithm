@@ -68,13 +68,13 @@
         front.next = &rear;
         rear.pre = &front;
 
-        // 按排序顺序连接链表，为了方便索引到列表节点，增加指针数组
+        // 按排序顺序连接链表，为了方便索引到列表节点，增加指针数组  pos 和 a一一对应
         for (int i = 1; i <= n; i++) {
-            pos[i] = AddNode(&rear, rank[i]);
+            pos[rank[i]] = AddNode(&rear, rank[i]);
         }
 
         for (int i = n; i > 1; i--) {
-            struct ListNode* cur = pos[rank[i]];
+            struct ListNode* cur = pos[i];
             if (cur->val - cur->pre->val <= cur->next->val - cur->val) {
                 ans[i] = cur->pre->idx;
             } else {
