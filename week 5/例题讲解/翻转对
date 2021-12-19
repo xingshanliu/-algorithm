@@ -1,0 +1,59 @@
+题目1：翻转对
+	https://leetcode-cn.com/problems/reverse-pairs/
+思路；
+	1.分治思路，求两相邻的划分块中（满足i>j），是否有两个数满足nums[i] > 2*nums[j]
+	2.由于两个划分块中数字已经单调递增，对于i变换到i + 1, 后半段是在对应i的基础上向后遍历
+代码：
+class Solution {
+public:
+    int reversePairs(vector<int>& nums) {
+        ans = 0;        
+        mergeSort(nums, 0, nums.size() - 1);
+        return ans;
+    }
+
+    void getAns(vector<int>& nums, int l, int mid, int r) {
+        int start = mid;
+        while (l <= mid) {
+            while (start < r && nums[l] > 2 * (long long)nums[start + 1]) {
+                start++;
+            }
+            ans += start - mid;
+            l++;
+        }
+    }
+
+    void mergeArray(vector<int>& nums, int l, int mid, int r) {
+        int totalLen = r - l + 1;
+        int *tmpArray = new int[totalLen];
+
+        int i = l;
+        int j = mid + 1;
+        for (int k = 0; k < totalLen; k++) {
+            if (j > r || i <= mid && nums[i] <= nums[j]) {
+                tmpArray[k] = nums[i++];
+            } else {
+                tmpArray[k] = nums[j++];
+            }
+        }
+
+        for (int k = 0; k < totalLen; k++) {
+            nums[l + k] = tmpArray[k];
+        }
+        delete[] tmpArray;
+    }
+    
+    void mergeSort(vector<int>& nums, int l, int r) {
+        if (l >= r) { 
+            return;
+        }
+
+        int mid = (l + r) >> 1;
+        mergeSort(nums, l, mid);
+        mergeSort(nums, mid + 1, r);
+        getAns(nums, l, mid, r);
+        mergeArray(nums, l, mid, r);
+    } 
+
+    int ans;
+};

@@ -1,0 +1,39 @@
+题目1:数组中的第K个最大元素
+	https://leetcode-cn.com/problems/kth-largest-element-in-an-array/
+思路：
+	1.快速排序，当划分到n-k个位置时，就为答案。
+	2.时间复杂度O(N)。相比于原生的快排，只会往其中一边遍历。
+代码：
+class Solution {
+public:
+    int findKthLargest(vector<int>& nums, int k) {
+        return quickFind(nums, 0, nums.size() - 1, nums.size() - k);
+    }
+
+    int partition(vector<int>& nums, int l, int r) {
+        int pivot = r;
+        int pivotVal = nums[pivot];
+        swap(nums[pivot], nums[r]);
+
+        int i = l;
+        for (int j = l; j < r; j++) {
+            if (nums[j] < pivotVal) {
+                swap(nums[i++], nums[j]);
+            }
+        }
+
+        swap(nums[i], nums[r]);
+        return i;
+    }
+    
+    int quickFind(vector<int>& nums, int l, int r, int k) {
+        int pivot = partition(nums, l, r);
+        if (pivot == k) {           
+            return nums[k];
+        } else if (k < pivot) {
+            return quickFind(nums, l, pivot - 1, k);
+        } else {
+            return quickFind(nums, pivot + 1, r, k);
+        }
+    } 
+};
