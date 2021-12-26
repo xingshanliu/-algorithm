@@ -9,7 +9,7 @@ public:
         for (int i = 1; i <= num; i++) {
             preSum[i] = preSum[i - 1] + nums[i - 1];
         }
-        mergeSort(preSum, 1, nums.size());
+        mergeSort(preSum, 0, nums.size());
         return count;
     }
 
