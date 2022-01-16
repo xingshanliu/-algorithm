@@ -1,0 +1,67 @@
+0/1背包模板：
+for (int i = 0; i < n; i++) {
+	for (int j = m; j >= w[i]; j--) {
+		dp[j] = max(dp[j], dp[j - w[i]] + v[j]);
+	}
+}
+
+完全背包模板：
+for (int i = 0; i < n; i++) {
+	for (int j = w[i]; j <= m; j++) {
+		dp[j] = max(dp[j], dp[j - w[i]] + v[j]);
+	}
+}
+
+题目1：分割等和子集
+https://leetcode-cn.com/problems/partition-equal-subset-sum/
+思路：
+	1.转换为0/1背包的可行性问题
+	2.求n个中能否找出i个数凑成n个数总和/2
+代码:
+class Solution {
+public:
+    bool canPartition(vector<int>& nums) {
+        int num = nums.size();
+        int sum = 0;
+        for (auto num : nums) {
+            sum += num;
+        }
+
+        if (sum % 2 == 1) {
+            return false;
+        }
+
+        vector<bool> dp(sum / 2 + 1, false);
+        dp[0] = true;   // 可行性问题，初值为true
+        for (int i = 0; i < num; i++) {
+            for (int j = sum / 2; j >= nums[i]; j--) {   // 0/1背包，从后往前
+                dp[j] = dp[j] | dp[j - nums[i]] ;        // 或操作
+            }
+        }
+
+        return dp[sum / 2];
+    }
+};
+
+题目2： 零钱兑换 II
+https://leetcode-cn.com/problems/coin-change-2/
+思路：
+	1.转换为0/1背包的计数问题
+代码：
+class Solution {
+public:
+    int change(int amount, vector<int>& coins) {
+        int num = coins.size();
+        vector<int> dp(amount + 1, 0);
+        dp[0] = 1;  // 边界初值
+        for (int i = 0; i < num; i++) {
+            for (int j = coins[i]; j <= amount; j++) {
+                dp[j] += dp[j - coins[i]];
+            }
+        }
+
+        return dp[amount];
+    }
+};
+
+

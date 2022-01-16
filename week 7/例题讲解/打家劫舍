@@ -1,0 +1,69 @@
+题目1: 198. 打家劫舍
+https://leetcode-cn.com/problems/house-robber/
+思路：
+1.人工模拟 
+	每一间屋子偷或者不偷，2^n指数搜索
+2.定义状态 
+	状态a：第几间屋子
+	状态b：
+	dp[i][j]
+3.确定最优子结构
+	a.偷    dp[i][1] = dp[i - 1][0] + nums[i - 1];
+	b.不偷  dp[i][0] = dp[i - 1][j];  j=0或者1 
+4.写出状态转移方程
+	max(3a,3b,3c)
+6.确定边界、目标
+	dp[0][0] = 0，其他为负无穷
+	max(dp[n][1], dp[n][0])
+	
+代码：
+class Solution {
+public:
+    int rob(vector<int>& nums) {
+        int n = nums.size();
+        vector<vector<int>> dp(n + 1, vector<int>(2, -1e9));
+        dp[0][0] = 0;
+
+        for (int i = 1; i <= n; i++) {
+            for (int j = 0; j < 2; j++) {
+                dp[i][1] = max(dp[i][1], dp[i - 1][0] + nums[i - 1]);
+                dp[i][0] = max(dp[i][0], dp[i - 1][j]);
+            }
+        }
+        return max(dp[n][1], dp[n][0]);
+    }
+};
+
+题目2：打家劫舍 II
+https://leetcode-cn.com/problems/house-robber-ii/
+思路：
+	1.环形dp处理两端不能同时取。
+
+代码：class Solution {
+public:
+    int rob(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 1) {
+            return nums[0];
+        }
+        vector<vector<int>> dp(n + 1, vector<int>(2, -1e9));
+        dp[1][0] = 0;   // dp[1][1] = 1e9, 下标从2开始不取开头
+        for (int i = 2; i <= n; i++) {
+            for (int j = 0; j < 2; j++) {
+                dp[i][1] = max(dp[i][1], dp[i - 1][0] + nums[i - 1]);
+                dp[i][0] = max(dp[i][0], dp[i - 1][j]);
+            }
+        }
+
+        int ans = max(dp[n][1], dp[n][0]);
+        dp[1][0] = 0;
+        dp[1][1] = nums[0]; // dp[1][1] = nums[0], 已经取了开头下标从2开始不取开头
+        for (int i = 2; i <= n; i++) {
+            for (int j = 0; j < 2; j++) {
+                dp[i][1] = max(dp[i][1], dp[i - 1][0] + nums[i - 1]);
+                dp[i][0] = max(dp[i][0], dp[i - 1][j]);
+            }
+        }
+        return max(dp[n][0], ans);     // 没有dp[n][1] 不取结尾
+    }
+};

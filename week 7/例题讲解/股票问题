@@ -1,0 +1,121 @@
+解题步骤:
+1.人工模拟
+	关注轮廓变化
+2.定义状态
+	关注代表以及它们之间的递推关系
+3.确定最优子结构
+	关注人工模拟时做出的决策。
+4.写出状态转移方程
+	边界：启动，不能访问的非法
+5.确定边界、目标
+
+题目1：买卖股票的最佳时机 II	
+	https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-ii/
+思路：
+1.人工模拟 
+	每一天买入还是卖出
+2.定义状态 
+	状态a：持仓还是空仓  
+	状态b：第几天
+	dp[i][j]
+3.确定最优子结构
+	a.买入  dp[i][1] = max(dp[i][1], dp[i - 1][0] - prices[i - 1]);
+	b.卖出  dp[i][0] = max(dp[i][0], dp[i - 1][1] + prices[i - 1]);
+	c.不动  dp[i][j] = max(dp[i][j], dp[i - 1][j]);
+4.写出状态转移方程
+	max(3a,3b,3c)
+6.确定边界、目标
+	dp[0][0] = 0
+	dp[n][0]
+	
+代码：
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        int n = prices.size();
+        vector<vector<int>> dp(n + 1, vector<int>(2, -1e4));
+        dp[0][0] = 0;
+        for (int i = 1; i <= n; i++) {
+            dp[i][1] = max(dp[i][1], dp[i - 1][0] - prices[i - 1]);
+            dp[i][0] = max(dp[i][0], dp[i - 1][1] + prices[i - 1]);
+            for (int j = 0; j < 2; j++) {
+                dp[i][j] = max(dp[i][j], dp[i - 1][j]);
+            }
+        }
+
+        return dp[n][0];
+    }
+};
+
+
+题目2：买卖股票的最佳时机 
+题目3：买卖股票的最佳时机 III
+题目4：买卖股票的最佳时机 IV
+
+思路：
+1.人工模拟 
+	每一天买入还是卖出,且有次数限制
+2.定义状态 
+	状态a：持仓还是空仓  
+	状态b：第几天
+	状态c：交易几次
+	dp[i][j][k]
+3.确定最优子结构
+	a.买入  dp[i][1][k] = max(dp[i][1][k], dp[i - 1][0][k - 1] - prices[i - 1]);
+	b.卖出  dp[i][0][k] = max(dp[i][0][k], dp[i - 1][1][k] + prices[i - 1]);
+	c.不动  dp[i][j][k] = max(dp[i][j][k], dp[i - 1][j][k]);
+4.写出状态转移方程
+	max(3a,3b,3c)
+6.确定边界、目标
+	dp[0][0][k] = 0
+	max(dp[n][0][k])
+代码：
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        int n = prices.size();
+        int c = 2;
+        vector<vector<vector<int>>> dp(n + 1, vector<vector<int>>(2, vector<int>(c + 1, -1e9)));  // 需要0次交易，所以是c+1sd
+        dp[0][0][0] = 0;  
+        for (int i = 1; i <= n; i++) {
+            for (int j = 0; j < 2; j++) {
+                for (int k = 0; k <= c; k++) {                                 // 注意这里是k<=c
+                    if (k > 0) {
+                        dp[i][1][k] = max(dp[i][1][k], dp[i - 1][0][k - 1] - prices[i - 1]);
+                    }
+                    dp[i][0][k] = max(dp[i][0][k], dp[i - 1][1][k] + prices[i - 1]);
+                    dp[i][j][k] = max(dp[i][j][k], dp[i - 1][j][k]);
+                }
+            }
+        }
+
+        int ans = -1e9;
+        for (int i = 0; i <= c; i++) {
+            ans = max(dp[n][0][i], ans);
+        }
+        return ans;
+    }
+};
+
+题目4：买卖股票的最佳时机含手续费
+https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/
+思路：
+手续费不影响状态，只喜欢在计算利润的时候减去即可
+代码：
+class Solution {
+public:
+    int maxProfit(vector<int>& prices, int fee) {
+        int n = prices.size();
+        vector<vector<int>> dp(n + 1, vector<int>(2, -1e9));
+        dp[0][0] = 0;
+        for (int i = 1; i <= n; i++) {
+            dp[i][1] = max(dp[i][1], dp[i - 1][0] - prices[i - 1] - fee);
+            dp[i][0] = max(dp[i][0], dp[i - 1][1] + prices[i - 1]);
+            for (int j = 0; j < 2; j++) {
+                dp[i][j] = max(dp[i][j], dp[i - 1][j]);
+            }
+        }
+
+        return dp[n][0];
+    }
+};

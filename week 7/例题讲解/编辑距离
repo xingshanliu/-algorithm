@@ -1,0 +1,42 @@
+题目1 编辑距离
+	https://leetcode-cn.com/problems/edit-distance/
+思路；
+1.人工模拟
+	两串的前缀比较
+2.定义状态
+	与lcs类似，二维状态标识word1前缀i和word1前缀j的编辑距离
+3.确定最优子结构
+	决策a: dp[i - 1][j] + 1
+	决策b: dp[i][j - 1] + 1
+	决策c: dp[i - 1][j - 1] + word1[i] != word1[j]
+4.写出状态转移方程
+	dp[i][j] = min(决策a, 决策b, 决策c)
+5.确定边界、目标
+	dp[i][0] = i, dp[0][j] = j
+	dp[i][j]
+	
+代码：
+class Solution {
+public:
+    int minDistance(string word1, string word2) {
+        int x = word1.size();
+        int y = word2.size();
+
+        vector<vector<int>> dp(x + 1, vector<int>(y + 1, 0));
+        for (int i = 1; i <= x; i++) {
+            dp[i][0] = i;
+        }
+
+         for (int j = 1; j <= y; j++) {
+            dp[0][j] = j;
+        }
+
+        for (int i = 1; i <= x; i++) {
+            for (int j = 1; j <= y; j++) {
+                 dp[i][j] = min(min(dp[i - 1][j] + 1, dp[i][j - 1] + 1), (dp[i - 1][j - 1] + (int)(word1[i - 1] != word2[j - 1])));
+            }
+        }
+
+        return dp[x][y];
+    }
+};

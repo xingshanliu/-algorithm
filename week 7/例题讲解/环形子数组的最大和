@@ -1,0 +1,50 @@
+题目：环形子数组的最大和
+https://leetcode-cn.com/problems/maximum-sum-circular-subarray/
+
+思路1：
+	1.区间字段和的升级版，首位可以相连
+	2.环形问题，将n的数组扩展为2n，
+	3.先求前缀和preSum[i]
+	4.max(preSum[i] - min(preSum[j])) ,其中j < i,同时j >= i - n，注意这里是能=
+	满足滑动窗口定义
+	
+代码：
+class Solution {
+public:
+    int maxSubarraySumCircular(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 1) {
+            return nums[0];
+        }
+        vector<int> preSum(2 * n + 1, 0);
+
+        for (int i = 1; i <= n; i++) {
+            preSum[i] = preSum[i - 1] +  nums[i - 1];
+        }
+ 
+        for (int i = n + 1; i <= 2 * n; i++) {
+            preSum[i] = preSum[i - 1] +  nums[i - 1 - n];
+        }
+
+        deque<int> q;
+        int ans = -1e9;
+        for (int i = 1; i <= 2 * n; i++) {
+            // i - j + 1 <= n -> j >=  i - n + 1
+            while (!q.empty() && q.front() < i - n) {
+                q.pop_front();
+            }
+
+            if (!q.empty()) {
+                ans = max(ans, preSum[i] - preSum[q.front()]);
+            }
+            // 维护最小值，单调递增
+            while (!q.empty() && preSum[q.back()] >= preSum[i]) {
+                q.pop_back();
+            }
+
+            q.push_back(i);
+        }
+
+        return ans;
+    }
+};
