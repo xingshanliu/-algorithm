@@ -1,0 +1,178 @@
+题目1：
+https://leetcode-cn.com/problems/implement-trie-prefix-tree/
+代码：
+class Trie {
+public:
+    Trie() {
+        root = new Node();
+    }
+    
+    void insert(string word) {
+        trieInner(word, true, false);
+    }
+    
+    bool search(string word) {
+        return trieInner(word, false, false);
+    }
+    
+    bool startsWith(string prefix) {
+        return trieInner(prefix, false, true);
+    }
+
+    struct Node {
+        int count;
+        unordered_map<char, struct Node*> child;
+        Node(): count(0) {};
+    };
+
+    struct Node *root;
+    bool trieInner(string word, bool isInsert, bool isPrefix) {
+        struct Node *curNode = root;
+        for (auto ch : word) {
+            if (curNode->child.find(ch) == curNode->child.end()) {
+                if (isInsert) {
+                    curNode->child[ch] = new Node();
+                } else {
+                    return false;
+                }
+            }
+            curNode = curNode->child[ch];
+        }
+
+        if (isInsert) {
+            curNode->count++;
+        }
+        if (isPrefix) {
+            return true;
+        }       
+        return curNode->count > 0;
+    }
+};
+
+/**
+ * Your Trie object will be instantiated and called as such:
+ * Trie* obj = new Trie();
+ * obj->insert(word);
+ * bool param_2 = obj->search(word);
+ * bool param_3 = obj->startsWith(prefix);
+ */
+ 
+ 题目2：单词搜索 II
+ https://leetcode-cn.com/problems/word-search-ii/
+ 思路：
+	1.DFS搜索，从任意一个点出现，走过的路径如果是单词集合的前缀，继续往下走，如果等于单词集合的任意一个，加入答案。
+	2.先用前缀树处理单词集合
+	3.优化点，DFS和前缀匹配同时递归遍历，如果前缀结点已经没有子节点，则可以移除当前结点，避免重复遍历。
+代码：
+struct Node {
+    int count;
+    unordered_map<char, struct Node*> child;
+    Node(): count(0) {};
+};
+
+class Trie {
+public:
+    Trie() {
+        root = new Node();
+    }
+    
+    void insert(string word) {
+        trieInner(word, true, false);
+    }
+    
+    bool search(string word) {
+        return trieInner(word, false, false);
+    }
+    
+    bool startsWith(string prefix) {
+        return trieInner(prefix, false, true);
+    }
+    struct Node *root;
+    bool trieInner(string word, bool isInsert, bool isPrefix) {
+        struct Node *curNode = root;
+        for (auto ch : word) {
+            if (curNode->child.find(ch) == curNode->child.end()) {
+                if (isInsert) {
+                    curNode->child[ch] = new Node();
+                } else {
+                    return false;
+                }
+            }
+            curNode = curNode->child[ch];
+        }
+
+        if (isInsert) {
+            curNode->count++;
+        }
+        if (isPrefix) {
+            return true;
+        }       
+        return curNode->count > 0;
+    }
+};
+
+class Solution {
+public:
+    vector<string> findWords(vector<vector<char>>& board, vector<string>& words) {
+        for (auto &word : words) {
+            tree.insert(word);
+        }
+        m = board.size();
+        n = board[0].size();
+        visited.assign(m, vector<bool>(n, false));
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                visited[i][j] = true;
+                dfs(board, i, j, tree.root);
+                visited[i][j] = false;
+            }
+        }
+
+        
+        return vector<string> (strAns.begin(), strAns.end());
+    }
+
+    void dfs(vector<vector<char>>& board, int x, int y, struct Node *curNode) {
+        char ch = board[x][y];
+        if (curNode->child.find(ch) == curNode->child.end()) {
+            return;
+        }
+        
+        picked.push_back(ch);
+        struct Node *nextNode = curNode->child[ch];
+        if (nextNode->count > 0) {
+            strAns.insert(picked);    // 找到结果之后，还是需要往下查找的，可能单词集合(aao,aaao)
+        } 
+        
+        if (nextNode->child.empty()) {
+            curNode->child.erase(ch);       // 前缀结点无孩子，删除当前结点。
+            delete nextNode;
+        } else {
+            for (int dr = 0; dr < 4; dr++) {
+                int nx = x + dx[dr];
+                int ny = y + dy[dr];
+                if (nx < 0 || ny < 0 || nx >= m || ny >= n) {
+                    continue;
+                }
+
+                if (visited[nx][ny]) {
+                    continue;
+                }
+
+                visited[nx][ny] = true;
+                dfs(board, nx, ny, nextNode);
+                visited[nx][ny] = false;
+            }
+        }
+
+        picked.pop_back();
+    } 
+
+    int m, n;
+    const int dy[4] = {0, 0, 1, -1};
+    const int dx[4] = {1, -1, 0, 0};
+    unordered_set<string> strAns;
+    vector<vector<bool>> visited;
+    string picked;
+    class Trie tree;
+};

@@ -1,0 +1,43 @@
+题目:打家劫舍 III
+https://leetcode-cn.com/problems/house-robber-iii/
+思路：
+	1.自底向上递归
+	2.针对根结点，如果子节点都没有被偷过，才能偷。
+	3.dp[x][1] = dp[left_child][0] + dp[right_child][1]    // 偷
+	  dp[x][0] = max(dp[left_child][0], dp[left_child][1]) + max(right_child][0], dp[right_child][1]); // 不偷
+代码：
+
+	/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    int rob(TreeNode* root) {
+        treeDP[nullptr] = vector<int>(2, 0);
+        dfs(root);
+        return max(treeDP[root][0], treeDP[root][1]);
+    }
+
+    unordered_map<TreeNode*, vector<int>> treeDP;
+
+    void dfs(TreeNode* root) {
+        if (root == nullptr) {
+            return;
+        }
+        
+        treeDP[root] = vector<int>(2, 0);
+        dfs(root->left);
+        dfs(root->right);
+        treeDP[root][0] = max(treeDP[root->left][0], treeDP[root->left][1]) + 
+            max(treeDP[root->right][0], treeDP[root->right][1]);
+        treeDP[root][1] = root->val + treeDP[root->right][0] + treeDP[root->left][0];
+    }
+};
